@@ -70,7 +70,7 @@ ssh alice@203.0.113.10
 **1. Récupérer le code**
 
 ```bash
-git clone https://github.com/<organisation>/annuaire.git
+git clone https://github.com/kodjo-touglo/annuaire.git
 cd annuaire
 python3 -m venv venv
 source venv/bin/activate
