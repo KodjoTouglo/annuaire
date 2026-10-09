@@ -1,0 +1,25 @@
+{% extends "directory/base.html" %}
+
+{% block title %}{{ provider.name }} - Annuaire local{% endblock %}
+
+{% block content %}
+<p><a href="{% url 'directory:list' %}">&larr; Retour à la liste</a></p>
+
+<article class="detail">
+  {% if provider.photo %}
+    <img src="{{ provider.photo.url }}" alt="{{ provider.name }}">
+  {% endif %}
+
+  <h1>{{ provider.name }}</h1>
+  <p class="meta">{{ provider.category }} &middot; {{ provider.city }}</p>
+
+  {% if provider.description %}
+    <p>{{ provider.description|linebreaksbr }}</p>
+  {% endif %}
+
+  <p class="actions">
+    <a class="button" href="tel:{{ provider.phone }}">Appeler {{ provider.phone }}</a>
+    <a class="button secondary" href="{{ provider.whatsapp_url }}" rel="noopener">WhatsApp</a>
+  </p>
+</article>
+{% endblock %}

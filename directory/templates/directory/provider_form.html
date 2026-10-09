@@ -1,0 +1,28 @@
+{% extends "directory/base.html" %}
+
+{% block title %}Proposer un prestataire - Annuaire local{% endblock %}
+
+{% block content %}
+<h1>Proposer un prestataire</h1>
+<p>Votre proposition sera visible après validation.</p>
+
+<form method="post" enctype="multipart/form-data" class="stacked">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+
+  {% for field in form %}
+    {% if field.name != "website" %}
+      <div class="field">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {{ field.errors }}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  <div class="hp" aria-hidden="true">{{ form.website }}</div>
+
+  <button type="submit">Envoyer</button>
+</form>
+{% endblock %}

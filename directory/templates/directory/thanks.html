@@ -1,0 +1,7 @@
+{% extends "directory/base.html" %}
+
+{% block content %}
+<h1>Merci</h1>
+<p>Votre proposition a bien été reçue. Elle apparaîtra dans l'annuaire une fois validée.</p>
+<p><a href="{% url 'directory:list' %}">Retour à la liste</a></p>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Annuaire local{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'directory/style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="{% url 'directory:list' %}">Annuaire local</a>
+      <nav>
+        <a href="{% url 'directory:list' %}">Prestataires</a>
+        <a href="{% url 'directory:submit' %}">Proposer un prestataire</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">Projet d'apprentissage du déploiement Django</div>
+  </footer>
+</body>
+</html>

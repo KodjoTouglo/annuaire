@@ -1,0 +1,57 @@
+{% extends "directory/base.html" %}
+
+{% block content %}
+<h1>Trouver un prestataire</h1>
+
+<form method="get" class="filters">
+  <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Nom, métier...">
+
+  <select name="category">
+    <option value="">Toutes les catégories</option>
+    {% for c in categories %}
+      <option value="{{ c.pk }}" {% if request.GET.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="city">
+    <option value="">Toutes les villes</option>
+    {% for city in cities %}
+      <option value="{{ city }}" {% if request.GET.city|lower == city|lower %}selected{% endif %}>{{ city }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit">Rechercher</button>
+</form>
+
+{% if providers %}
+  <div class="grid">
+    {% for p in providers %}
+      <a class="card" href="{% url 'directory:detail' p.pk %}">
+        {% if p.photo %}
+          <img src="{{ p.photo.url }}" alt="{{ p.name }}">
+        {% else %}
+          <div class="placeholder"></div>
+        {% endif %}
+        <div class="card-body">
+          <h2>{{ p.name }}</h2>
+          <p class="meta">{{ p.category }} &middot; {{ p.city }}</p>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if is_paginated %}
+    <nav class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">Précédent</a>
+      {% endif %}
+      <span>Page {{ page_obj.number }} sur {{ paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?{{ querystring }}&page={{ page_obj.next_page_number }}">Suivant</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+{% else %}
+  <p class="empty">Aucun prestataire trouvé.</p>
+{% endif %}
+{% endblock %}
