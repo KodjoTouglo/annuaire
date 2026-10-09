@@ -1,0 +1,10 @@
+[
+  {"model": "directory.category", "pk": 1, "fields": {"name": "Couture"}},
+  {"model": "directory.category", "pk": 2, "fields": {"name": "Coiffure et beauté"}},
+  {"model": "directory.category", "pk": 3, "fields": {"name": "Mécanique"}},
+  {"model": "directory.category", "pk": 4, "fields": {"name": "Électricité"}},
+  {"model": "directory.category", "pk": 5, "fields": {"name": "Plomberie"}},
+  {"model": "directory.category", "pk": 6, "fields": {"name": "Restauration"}},
+  {"model": "directory.category", "pk": 7, "fields": {"name": "Informatique et téléphonie"}},
+  {"model": "directory.category", "pk": 8, "fields": {"name": "Menuiserie"}}
+]
