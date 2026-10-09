@@ -1,0 +1,21 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${APP_HOST};
+
+    client_max_body_size 5m;
+
+    location /static/ {
+        alias /home/${APP_USER}/annuaire/staticfiles/;
+        expires 7d;
+    }
+
+    location /media/ {
+        alias /home/${APP_USER}/annuaire/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/annuaire-${APP_USER}/gunicorn.sock;
+    }
+}

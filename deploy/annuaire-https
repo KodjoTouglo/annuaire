@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Get a Let's Encrypt certificate for the calling student's sslip.io host.
+# Installed in /usr/local/sbin, used via sudo.
+set -euo pipefail
+
+user="${SUDO_USER:?run with sudo}"
+host="$(awk '/server_name/ {gsub(";", "", $2); print $2; exit}' "/etc/nginx/sites-available/annuaire-$user")"
+
+email="$(cat /etc/annuaire/certbot_email)"
+if [ -n "$email" ]; then
+    contact=(-m "$email")
+else
+    contact=(--register-unsafely-without-email)
+fi
+
+certbot --nginx -d "$host" --non-interactive --agree-tos --redirect "${contact[@]}"
