@@ -17,8 +17,15 @@ fi
 read -r -p "Delete $user, its home, its containers and its data? [y/N] " answer
 [ "$answer" = "y" ] || exit 0
 
+host="$(awk '/server_name/ {gsub(";", "", $2); print $2; exit}' "/etc/nginx/sites-available/annuaire-$user" 2>/dev/null || true)"
+
 rm -f "/etc/nginx/sites-enabled/annuaire-$user" "/etc/nginx/sites-available/annuaire-$user"
 nginx -t && systemctl reload nginx
+
+# Otherwise certbot keeps trying to renew a certificate for a dead site
+if [ -n "$host" ]; then
+    certbot delete --cert-name "$host" --non-interactive >/dev/null 2>&1 || true
+fi
 
 # Stopping the user manager stops the rootless daemon and its containers
 loginctl disable-linger "$user"

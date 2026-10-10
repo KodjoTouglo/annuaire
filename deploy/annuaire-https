@@ -4,6 +4,12 @@
 set -euo pipefail
 
 user="${SUDO_USER:?run with sudo}"
+
+# Certbot refuses to run twice at once, so a whole class asking for a
+# certificate together would mostly fail: wait for our turn instead
+exec 9>/run/lock/annuaire-https.lock
+flock 9
+
 host="$(awk '/server_name/ {gsub(";", "", $2); print $2; exit}' "/etc/nginx/sites-available/annuaire-$user")"
 
 email="$(cat /etc/annuaire/certbot_email)"
