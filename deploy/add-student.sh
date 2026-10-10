@@ -47,15 +47,13 @@ as_student() {
     (cd "/home/$user" && runuser -u "$user" -- env HOME="/home/$user" \
         XDG_RUNTIME_DIR="/run/user/$uid" \
         DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-        DOCKER_HOST="unix:///run/user/$uid/docker.sock" \
         PATH=/usr/bin:/bin "$@")
 }
 
+# The setup tool also creates and selects the "rootless" CLI context,
+# so the docker command finds the student's daemon in every shell
 as_student dockerd-rootless-setuptool.sh install
 as_student docker load -i /opt/annuaire/images.tar
-
-# Interactive shells find the student's own daemon
-echo "export DOCKER_HOST=unix:///run/user/$uid/docker.sock" >> "/home/$user/.bashrc"
 
 export APP_HOST="$host" APP_PORT="$port"
 envsubst '${APP_HOST} ${APP_PORT}' < /etc/annuaire/templates/nginx.conf.template \
