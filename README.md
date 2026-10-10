@@ -50,7 +50,7 @@ Chaque étudiant a :
 - son adresse `https://<user>.<ip-avec-tirets>.sslip.io`.
 
 Pas besoin de nom de domaine : [sslip.io](https://sslip.io) résout
-`alice.203-0-113-10.sslip.io` vers `203.0.113.10`, ce qui suffit à Let's Encrypt
+`michel.203-0-113-10.sslip.io` vers `203.0.113.10`, ce qui suffit à Let's Encrypt
 pour délivrer un vrai certificat.
 
 ## Côté formateur (une fois)
@@ -71,19 +71,19 @@ pour délivrer un vrai certificat.
 3. Pour chaque étudiant, avec sa clé publique :
 
    ```bash
-   ./deploy/add-student.sh alice /chemin/vers/alice.pub
+   ./deploy/add-student.sh michel /chemin/vers/michel.pub
    ```
 
    Le script affiche l'adresse du site et le port à transmettre à l'étudiant.
 
-4. Après la session : `./deploy/remove-student.sh alice`.
+4. Après la session : `./deploy/remove-student.sh michel`.
 
 ## Côté étudiant
 
-Remplacer `alice`, l'adresse et le port par les vôtres.
+Remplacer `michel`, l'adresse et le port par les vôtres.
 
 ```bash
-ssh alice@203.0.113.10
+ssh michel@203.0.113.10
 ```
 
 **1. Récupérer le code**
@@ -122,7 +122,7 @@ docker compose exec web python manage.py createsuperuser
 `load_demo` charge les catégories et 16 prestataires fictifs avec leur photo
 (crédits dans `directory/fixtures/photos/CREDITS.md`).
 
-Ouvrir `http://alice.203-0-113-10.sslip.io`. Le site répond en HTTP.
+Ouvrir `http://michel.203-0-113-10.sslip.io`. Le site répond en HTTP.
 
 **5. Activer HTTPS**
 

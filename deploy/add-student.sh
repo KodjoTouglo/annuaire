@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Create one student: Linux user, rootless Docker, port and nginx site.
-#   ./deploy/add-student.sh alice /path/to/alice.pub
+#   ./deploy/add-student.sh michel /path/to/michel.pub
 set -euo pipefail
 
 if [ "$(id -u)" -ne 0 ]; then
