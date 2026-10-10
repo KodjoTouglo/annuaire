@@ -5,7 +5,6 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 git pull --ff-only
-venv/bin/pip install -r requirements.txt
-venv/bin/python manage.py migrate --noinput
-venv/bin/python manage.py collectstatic --noinput
-sudo /usr/local/sbin/annuaire-restart
+# Rebuilds the web image; migrate and collectstatic run when it starts
+docker compose up -d --build
+docker compose ps

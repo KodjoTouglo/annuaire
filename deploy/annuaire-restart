@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-# Restart the calling student's app. Installed in /usr/local/sbin, used via sudo.
-set -euo pipefail
-
-user="${SUDO_USER:?run with sudo}"
-systemctl restart "annuaire-$user"
-systemctl --no-pager --lines=5 status "annuaire-$user"

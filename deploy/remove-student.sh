@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Delete a student's account, database and site. Cannot be undone.
+# Delete a student's account, containers, data and site. Cannot be undone.
 set -euo pipefail
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -14,18 +14,14 @@ if ! [[ "$user" =~ ^[a-z][a-z0-9]{1,15}$ ]] || ! groups "$user" 2>/dev/null | gr
     exit 1
 fi
 
-read -r -p "Delete $user, its home and its database? [y/N] " answer
+read -r -p "Delete $user, its home, its containers and its data? [y/N] " answer
 [ "$answer" = "y" ] || exit 0
 
-systemctl disable --now "annuaire-$user" || true
-rm -f "/etc/systemd/system/annuaire-$user.service"
 rm -f "/etc/nginx/sites-enabled/annuaire-$user" "/etc/nginx/sites-available/annuaire-$user"
-systemctl daemon-reload
 nginx -t && systemctl reload nginx
 
-runuser -u postgres -- psql -v ON_ERROR_STOP=1 <<SQL
-DROP DATABASE IF EXISTS "$user";
-DROP ROLE IF EXISTS "$user";
-SQL
+# Stopping the user manager stops the rootless daemon and its containers
+loginctl disable-linger "$user"
+systemctl stop "user@$(id -u "$user").service" || true
 
 deluser --remove-home "$user"

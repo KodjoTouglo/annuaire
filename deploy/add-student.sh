@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create one student: Linux user, Postgres database, gunicorn unit, nginx site.
+# Create one student: Linux user, rootless Docker, port and nginx site.
 #   ./deploy/add-student.sh alice /path/to/alice.pub
 set -euo pipefail
 
@@ -11,7 +11,7 @@ fi
 user="${1:?usage: add-student.sh <username> <public-key-file>}"
 keyfile="${2:?usage: add-student.sh <username> <public-key-file>}"
 
-# Lowercase letters and digits only: safe as a unix user, a DB name and a DNS label
+# Lowercase letters and digits only: safe as a unix user and a DNS label
 if ! [[ "$user" =~ ^[a-z][a-z0-9]{1,15}$ ]]; then
     echo "invalid username: use 2-16 lowercase letters/digits, starting with a letter" >&2
     exit 1
@@ -27,30 +27,40 @@ ip="${SERVER_IP:-$(ip -4 route get 1.1.1.1 | awk '{for (i = 1; i <= NF; i++) if 
 host="${user}.${ip//./-}.sslip.io"
 
 adduser --disabled-password --gecos "" "$user"
-# systemd-journal lets the student read their own service logs
-usermod -aG students,systemd-journal "$user"
+usermod -aG students "$user"
 
 install -d -m 700 -o "$user" -g "$user" "/home/$user/.ssh"
 install -m 600 -o "$user" -g "$user" "$keyfile" "/home/$user/.ssh/authorized_keys"
 
-# nginx (www-data) must be able to traverse the home dir to serve static files
-chmod 711 "/home/$user"
+uid="$(id -u "$user")"
+# One port per student, derived from the uid so it never collides
+port=$((8000 + uid - 1000))
 
-dbpass="$(openssl rand -hex 16)"
-runuser -u postgres -- psql -v ON_ERROR_STOP=1 <<SQL
-CREATE ROLE "$user" LOGIN PASSWORD '$dbpass';
-CREATE DATABASE "$user" OWNER "$user";
-SQL
+# Linger keeps the student's Docker daemon running without an open session
+loginctl enable-linger "$user"
+for _ in $(seq 1 30); do
+    [ -S "/run/user/$uid/bus" ] && break
+    sleep 1
+done
 
-export APP_USER="$user" APP_HOST="$host"
-envsubst '${APP_USER} ${APP_HOST}' < /etc/annuaire/templates/gunicorn.service.template \
-    > "/etc/systemd/system/annuaire-$user.service"
-envsubst '${APP_USER} ${APP_HOST}' < /etc/annuaire/templates/nginx.conf.template \
+as_student() {
+    (cd "/home/$user" && runuser -u "$user" -- env HOME="/home/$user" \
+        XDG_RUNTIME_DIR="/run/user/$uid" \
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+        DOCKER_HOST="unix:///run/user/$uid/docker.sock" \
+        PATH=/usr/bin:/bin "$@")
+}
+
+as_student dockerd-rootless-setuptool.sh install
+as_student docker load -i /opt/annuaire/images.tar
+
+# Interactive shells find the student's own daemon
+echo "export DOCKER_HOST=unix:///run/user/$uid/docker.sock" >> "/home/$user/.bashrc"
+
+export APP_HOST="$host" APP_PORT="$port"
+envsubst '${APP_HOST} ${APP_PORT}' < /etc/annuaire/templates/nginx.conf.template \
     > "/etc/nginx/sites-available/annuaire-$user"
 ln -sf "/etc/nginx/sites-available/annuaire-$user" "/etc/nginx/sites-enabled/annuaire-$user"
-
-systemctl daemon-reload
-systemctl enable "annuaire-$user"
 nginx -t
 systemctl reload nginx
 
@@ -59,7 +69,5 @@ cat <<EOF
 Student ready: $user
   ssh:       ssh $user@$ip
   url:       http://$host
-  DB_NAME:   $user
-  DB_USER:   $user
-  DB_PASSWORD (shown once): $dbpass
+  APP_PORT:  $port
 EOF

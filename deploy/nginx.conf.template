@@ -5,17 +5,9 @@ server {
 
     client_max_body_size 5m;
 
-    location /static/ {
-        alias /home/${APP_USER}/annuaire/staticfiles/;
-        expires 7d;
-    }
-
-    location /media/ {
-        alias /home/${APP_USER}/annuaire/media/;
-    }
-
+    # The student's docker compose stack listens on this port
     location / {
         include proxy_params;
-        proxy_pass http://unix:/run/annuaire-${APP_USER}/gunicorn.sock;
+        proxy_pass http://127.0.0.1:${APP_PORT};
     }
 }
